@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Roboto+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1F3F5;
+    --card:#FFFFFF;
+    --ink:#14181F;
+    --mute:#5B6472;
+    --line:#E3E6EA;
+    --accent:#1D4E89;
+    --good:#157F3C;
+    --warn:#B45309;
+    --bad:#B91C1C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter', system-ui, -apple-system, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding:20px 24px 40px;
+  }
+  .mono{font-family:'Roboto Mono', monospace;}
+  h1{font-size:17px; font-weight:700; margin:0; letter-spacing:-.01em;}
+  .sub{font-size:11px; color:var(--mute); margin-top:3px;}
+  .mono.sub{font-family:'Roboto Mono', monospace;}
+
+  #topBar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+  #searchBox{ position:relative; width:280px; max-width:100%; }
+  #searchBox input{
+    width:100%; padding:8px 10px 8px 30px; font-size:13px; border:1px solid var(--line);
+    border-radius:6px; background:#fff; font-family:'Inter',sans-serif;
+  }
+  #searchBox input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 2px rgba(29,78,137,.15); }
+  #searchBox svg{ position:absolute; left:9px; top:50%; transform:translateY(-50%); }
+
+  #filters{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:16px; align-items:center; }
+  .filter-group{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .filter-group .lbl{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); margin-right:2px; }
+  .chip{
+    padding:6px 12px; font-size:11.5px; font-weight:600; border-radius:6px; border:1px solid var(--line);
+    background:#fff; color:var(--mute); cursor:pointer; white-space:nowrap;
+  }
+  .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .chip:hover:not(.active){ border-color:#94A3B8; }
+
+  #statRow{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+  @media (max-width:700px){ #statRow{ grid-template-columns:repeat(2,1fr); } }
+  .stat{ background:var(--card); border:1px solid var(--line); border-radius:6px; padding:11px 14px; }
+  .stat .k{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); }
+  .stat .v{ font-family:'Roboto Mono',monospace; font-size:19px; font-weight:700; margin-top:3px; }
+  .stat .v.accent{ color:var(--accent); }
+  .stat .v.bad{ color:var(--bad); }
+
+  table{ width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:6px; overflow:hidden; font-size:13px; }
+  thead th{ background:#F8F9FA; border-bottom:1px solid var(--line); padding:9px 10px; text-align:left; }
+  th button{
+    background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:4px;
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--mute);
+    padding:0; font-family:'Inter',sans-serif;
+  }
+  th button:hover{ color:var(--ink); }
+  th.num button{ margin-left:auto; }
+  th.num{ text-align:right; }
+  tbody tr.main-row{ border-bottom:1px solid #F1F3F5; cursor:pointer; }
+  tbody tr.main-row:hover{ background:#FAFBFC; }
+  tbody tr.main-row:last-child{ border-bottom:none; }
+  tbody td{ padding:9px 10px; vertical-align:middle; }
+  td.num{ text-align:right; font-family:'Roboto Mono',monospace; }
+  td.nama{ font-weight:600; }
+  .chev{ display:inline-block; transition:transform .15s; color:var(--mute); }
+  .chev.open{ transform:rotate(90deg); }
+  .tag{ display:inline-block; padding:2px 8px; font-size:10.5px; font-weight:700; border-radius:4px; border:1px solid; }
+  .tag-bahan{ background:#EFF6FF; color:#1D4E89; border-color:#BFDBFE; }
+  .tag-box{ background:#FFF7ED; color:#9A3412; border-color:#FED7AA; }
+  .tag-slop{ background:#F0FDF4; color:#166534; border-color:#BBF7D0; }
+  .tag-pdkg{ background:#FDF4FF; color:#86198F; border-color:#F5D0FE; }
+  .tag-extruder{ background:#FFFBEB; color:#92400E; border-color:#FDE68A; }
+  .tag-default{ background:#F1F5F9; color:#475569; border-color:#E2E8F0; }
+
+  tr.detail-row td{ background:#FAFBFC; padding:12px 14px; }
+  .detail-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:12px; }
+  .detail-grid .dt{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); margin-bottom:6px; }
+  .detail-row-line{ display:flex; justify-content:space-between; padding:2px 0; font-family:'Roboto Mono',monospace; }
+  .detail-row-line span:first-child{ color:var(--mute); font-family:'Inter',sans-serif; font-size:11.5px; }
+
+  .empty, .err{ text-align:center; padding:30px; color:var(--mute); font-size:13px; }
+  .err{ color:var(--bad); }
+  #loading{ position:fixed; inset:0; background:rgba(20,24,31,.35); display:none; align-items:center; justify-content:center; z-index:50; }
+  #loading.show{ display:flex; }
+  #loading span{ font-family:'Roboto Mono',monospace; font-size:12px; background:#fff; padding:10px 16px; border-radius:8px; }
+  .footnote{ font-size:10.5px; color:var(--mute); margin-top:14px; font-family:'Roboto Mono',monospace; }
+</style>
+</head>
+<body>
+
+<div id="topBar">
+  <div>
+    <h1>Stok Bahan Baku</h1>
+    <div class="sub mono" id="updateInfo">Memuat...</div>
+  </div>
+  <div id="searchBox">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6472" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Cari nama barang..." oninput="stkOnSearch()">
+  </div>
+</div>
+
+<div id="filters">
+  <div class="filter-group" id="kategoriChips"></div>
+  <div class="filter-group" id="sumberChips"></div>
+</div>
+
+<div id="statRow"></div>
+
+<div id="tableWrap"></div>
+
+<div class="footnote" id="footnote"></div>
+
+<div id="loading"><span>MEMUAT DATA...</span></div>
+
+<script>
+var WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbx-1gAUoU6501QMmD6iU3jHWTNIcOqPfet8aG1_WwxLBRSQwHuv3ifXeS55swCCD25y/exec'; // ganti dengan URL /exec hasil Deploy, kalau diakses lewat luar (GitHub dll)
+
+var stkAllItems = [];
+var stkState = {
+  search: '',
+  kategori: 'Semua',
+  sumber: 'Semua',
+  sortKey: 'nama',
+  sortDir: 'asc',
+  expanded: null
+};
+
+function stkFmt(n, dec){
+  dec = dec === undefined ? 2 : dec;
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return Number(n).toLocaleString('id-ID', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+
+function stkTagClass(kategori){
+  var k = String(kategori||'').trim().toLowerCase();
+  if (k === 'bahan') return 'tag-bahan';
+  if (k === 'box') return 'tag-box';
+  if (k === 'slop') return 'tag-slop';
+  if (k === 'pdkg') return 'tag-pdkg';
+  if (k === 'extruder') return 'tag-extruder';
+  return 'tag-default';
+}
+
+function stkFetch(onSuccess, onError){
+  var runningInsideAppsScript = (typeof google !== 'undefined' && google.script && google.script.run);
+  if (runningInsideAppsScript){
+    google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onError).stkGetData();
+    return;
+  }
+  fetch(WEBAPP_URL + '?action=stok')
+    .then(function(res){ return res.json(); })
+    .then(onSuccess)
+    .catch(onError);
+}
+
+function stkLoad(){
+  document.getElementById('loading').classList.add('show');
+  stkFetch(function(data){
+    document.getElementById('loading').classList.remove('show');
+    if (data.error){
+      document.getElementById('tableWrap').innerHTML = '<div class="err">' + data.error + '</div>';
+      return;
+    }
+    stkAllItems = data.items || [];
+    document.getElementById('updateInfo').textContent = 'Update: ' + new Date(data.generatedAt).toLocaleString('id-ID');
+    stkBuildChips();
+    stkRender();
+  }, function(err){
+    document.getElementById('loading').classList.remove('show');
+    document.getElementById('tableWrap').innerHTML = '<div class="err">Gagal memuat data: ' + (err && err.message ? err.message : err) + '</div>';
+  });
+}
+
+function stkBuildChips(){
+  var kategoriSet = {};
+  var sumberSet = {};
+  stkAllItems.forEach(function(it){
+    kategoriSet[it.kategori] = true;
+    sumberSet[it.sumberFile] = true;
+  });
+  var kategoriList = ['Semua'].concat(Object.keys(kategoriSet).sort());
+  var sumberList = ['Semua'].concat(Object.keys(sumberSet).sort());
+
+  document.getElementById('kategoriChips').innerHTML =
+    '<span class="lbl">Kategori</span>' +
+    kategoriList.map(function(k){
+      return '<button class="chip' + (stkState.kategori===k?' active':'') + '" onclick="stkSetKategori(\'' + k.replace(/'/g,"\\'") + '\')">' + k + '</button>';
+    }).join('');
+
+  document.getElementById('sumberChips').innerHTML =
+    '<span class="lbl">Sumber File</span>' +
+    sumberList.map(function(s){
+      return '<button class="chip' + (stkState.sumber===s?' active':'') + '" onclick="stkSetSumber(\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</button>';
+    }).join('');
+}
+
+function stkSetKategori(k){ stkState.kategori = k; stkBuildChips(); stkRender(); }
+function stkSetSumber(s){ stkState.sumber = s; stkBuildChips(); stkRender(); }
+function stkOnSearch(){ stkState.search = document.getElementById('searchInput').value; stkRender(); }
+
+function stkSort(key){
+  if (stkState.sortKey === key){
+    stkState.sortDir = stkState.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    stkState.sortKey = key;
+    stkState.sortDir = 'asc';
+  }
+  stkRender();
+}
+
+function stkToggleExpand(nama){
+  stkState.expanded = (stkState.expanded === nama) ? null : nama;
+  stkRender();
+}
+
+function stkGetFiltered(){
+  var q = stkState.search.trim().toLowerCase();
+  return stkAllItems.filter(function(it){
+    if (stkState.kategori !== 'Semua' && it.kategori !== stkState.kategori) return false;
+    if (stkState.sumber !== 'Semua' && it.sumberFile !== stkState.sumber) return false;
+    if (q && it.nama.toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+}
+
+function stkSortIcon(key){
+  if (stkState.sortKey !== key) return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>';
+  if (stkState.sortDir === 'asc') return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  return '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
+}
+
+function stkRender(){
+  var filtered = stkGetFiltered();
+
+  var sorted = filtered.slice().sort(function(a,b){
+    var av = a[stkState.sortKey], bv = b[stkState.sortKey];
+    if (typeof av === 'string') return stkState.sortDir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return stkState.sortDir==='asc' ? av-bv : bv-av;
+  });
+
+  var totalItem = filtered.length;
+  var totalKategori = Object.keys(filtered.reduce(function(s,it){ s[it.kategori]=1; return s; },{})).length;
+  var totalSaldoAkhir = filtered.reduce(function(s,it){ return s+it.saldoAkhir; },0);
+  var itemTurun = filtered.filter(function(it){ return it.saldoAkhir < it.saldoAwal; }).length;
+
+  document.getElementById('statRow').innerHTML =
+    '<div class="stat"><div class="k">Total Item</div><div class="v">' + totalItem + '</div></div>' +
+    '<div class="stat"><div class="k">Kategori</div><div class="v">' + totalKategori + '</div></div>' +
+    '<div class="stat"><div class="k">Saldo Akhir (Total)</div><div class="v accent">' + stkFmt(totalSaldoAkhir) + '</div></div>' +
+    '<div class="stat"><div class="k">Item Turun</div><div class="v bad">' + itemTurun + '</div></div>';
+
+  if (sorted.length === 0){
+    document.getElementById('tableWrap').innerHTML = '<div class="empty">Tidak ada barang yang cocok dengan filter/pencarian.</div>';
+    document.getElementById('footnote').textContent = '';
+    return;
+  }
+
+  var html = '<table><thead><tr>' +
+    '<th style="width:26px;"></th>' +
+    '<th><button onclick="stkSort(\'nama\')">Nama Barang ' + stkSortIcon('nama') + '</button></th>' +
+    '<th>Kategori</th>' +
+    '<th class="num"><button onclick="stkSort(\'saldoAwal\')">Saldo Awal ' + stkSortIcon('saldoAwal') + '</button></th>' +
+    '<th class="num"><button onclick="stkSort(\'totalMasuk\')">Masuk ' + stkSortIcon('totalMasuk') + '</button></th>' +
+    '<th class="num"><button onclick="stkSort(\'totalKeluar\')">Keluar ' + stkSortIcon('totalKeluar') + '</button></th>' +
+    '<th class="num"><button onclick="stkSort(\'saldoAkhir\')">Saldo Akhir ' + stkSortIcon('saldoAkhir') + '</button></th>' +
+    '</tr></thead><tbody>';
+
+  sorted.forEach(function(it){
+    var isOpen = stkState.expanded === it.nama;
+    var akhirColor = it.saldoAkhir < it.saldoAwal ? 'color:var(--bad);' : '';
+    html += '<tr class="main-row" onclick="stkToggleExpand(\'' + it.nama.replace(/'/g,"\\'") + '\')">' +
+      '<td><span class="chev' + (isOpen?' open':'') + '">&#9656;</span></td>' +
+      '<td class="nama">' + it.nama + '</td>' +
+      '<td><span class="tag ' + stkTagClass(it.kategori) + '">' + it.kategori + '</span></td>' +
+      '<td class="num">' + stkFmt(it.saldoAwal) + '</td>' +
+      '<td class="num" style="color:var(--good);">' + stkFmt(it.totalMasuk) + '</td>' +
+      '<td class="num" style="color:var(--bad);">' + stkFmt(it.totalKeluar) + '</td>' +
+      '<td class="num" style="font-weight:700;' + akhirColor + '">' + stkFmt(it.saldoAkhir) + '</td>' +
+      '</tr>';
+
+    if (isOpen){
+      html += '<tr class="detail-row"><td></td><td colspan="6">' +
+        '<div class="detail-grid">' +
+        '<div><div class="dt">Rincian Masuk</div>' +
+        '<div class="detail-row-line"><span>Supplier</span><span>' + stkFmt(it.masuk.supplier) + '</span></div>' +
+        '<div class="detail-row-line"><span>Suwayuwo</span><span>' + stkFmt(it.masuk.suwayuwo) + '</span></div>' +
+        '<div class="detail-row-line"><span>Lawang</span><span>' + stkFmt(it.masuk.lawang) + '</span></div>' +
+        '<div class="detail-row-line"><span>Produksi</span><span>' + stkFmt(it.masuk.produksi) + '</span></div>' +
+        '<div class="detail-row-line"><span>Lain-lain</span><span>' + stkFmt(it.masuk.lain) + '</span></div>' +
+        '</div>' +
+        '<div><div class="dt">Rincian Keluar</div>' +
+        '<div class="detail-row-line"><span>Prod. 2</span><span>' + stkFmt(it.keluar.prod2) + '</span></div>' +
+        '<div class="detail-row-line"><span>Lawang</span><span>' + stkFmt(it.keluar.lawang) + '</span></div>' +
+        '<div class="detail-row-line"><span>Jual</span><span>' + stkFmt(it.keluar.jual) + '</span></div>' +
+        '<div class="detail-row-line"><span>Lain-2</span><span>' + stkFmt(it.keluar.lain2) + '</span></div>' +
+        '</div></div>' +
+        '<div style="margin-top:8px; font-size:10.5px; color:var(--mute);">Sumber: ' + it.sumberFile + '</div>' +
+        '</td></tr>';
+    }
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('tableWrap').innerHTML = html;
+  document.getElementById('footnote').textContent = 'Menampilkan ' + sorted.length + ' dari ' + stkAllItems.length + ' total item (5 kategori: ' + STK_KATEGORI_LABEL + ').';
+}
+
+var STK_KATEGORI_LABEL = 'Bahan, Box, Slop, PDKG, Extruder';
+
+stkLoad();
+</script>
+</body>
+</html>
