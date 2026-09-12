@@ -113,6 +113,7 @@
 <div id="filters">
   <div class="filter-group" id="kategoriChips"></div>
   <div class="filter-group" id="sumberChips"></div>
+  <div class="filter-group" id="stokAdaWrap"></div>
 </div>
 
 <div id="statRow"></div>
@@ -133,7 +134,8 @@ var stkState = {
   sumber: 'Semua',
   sortKey: 'nama',
   sortDir: 'asc',
-  expanded: null
+  expanded: null,
+  stokAdaSaja: false
 };
 
 function stkFmt(n, dec){
@@ -203,8 +205,13 @@ function stkBuildChips(){
     sumberList.map(function(s){
       return '<button class="chip' + (stkState.sumber===s?' active':'') + '" onclick="stkSetSumber(\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</button>';
     }).join('');
+
+  document.getElementById('stokAdaWrap').innerHTML =
+    '<span class="lbl">Ringkas</span>' +
+    '<button class="chip' + (stkState.stokAdaSaja?' active':'') + '" onclick="stkToggleStokAda()">Stok Ada Saja (Saldo Akhir &gt; 0)</button>';
 }
 
+function stkToggleStokAda(){ stkState.stokAdaSaja = !stkState.stokAdaSaja; stkBuildChips(); stkRender(); }
 function stkSetKategori(k){ stkState.kategori = k; stkBuildChips(); stkRender(); }
 function stkSetSumber(s){ stkState.sumber = s; stkBuildChips(); stkRender(); }
 function stkOnSearch(){ stkState.search = document.getElementById('searchInput').value; stkRender(); }
@@ -229,6 +236,7 @@ function stkGetFiltered(){
   return stkAllItems.filter(function(it){
     if (stkState.kategori !== 'Semua' && it.kategori !== stkState.kategori) return false;
     if (stkState.sumber !== 'Semua' && it.sumberFile !== stkState.sumber) return false;
+    if (stkState.stokAdaSaja && !(it.saldoAkhir > 0)) return false;
     if (q && it.nama.toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
