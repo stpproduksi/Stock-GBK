@@ -101,7 +101,7 @@
 
 <div id="topBar">
   <div>
-    <h1>Stok Bahan Baku</h1>
+    <h1>Stok Bahan & Kemasan</h1>
     <div class="sub mono" id="updateInfo">Memuat...</div>
   </div>
   <div id="searchBox">
@@ -208,7 +208,7 @@ function stkBuildChips(){
 
   document.getElementById('stokAdaWrap').innerHTML =
     '<span class="lbl">Ringkas</span>' +
-    '<button class="chip' + (stkState.stokAdaSaja?' active':'') + '" onclick="stkToggleStokAda()">Stok Ada Saja (Saldo Akhir &gt; 0)</button>';
+    '<button class="chip' + (stkState.stokAdaSaja?' active':'') + '" onclick="stkToggleStokAda()">STOK SING ONOK SAIKI </button>';
 }
 
 function stkToggleStokAda(){ stkState.stokAdaSaja = !stkState.stokAdaSaja; stkBuildChips(); stkRender(); }
